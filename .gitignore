@@ -1,3 +1,10 @@
+*.iml
+.idea/
+target/
+logs/
+*.log
+flume_libs/
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
