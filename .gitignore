@@ -4,6 +4,7 @@ target/
 logs/
 *.log
 flume_libs/
+flume_1.4_libs/
 
 # Windows image file caches
 Thumbs.db
