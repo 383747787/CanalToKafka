@@ -5,6 +5,7 @@ logs/
 *.log
 flume_libs/
 flume_1.4_libs/
+.svn/
 
 # Windows image file caches
 Thumbs.db
