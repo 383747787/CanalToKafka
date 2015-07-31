@@ -87,11 +87,8 @@ public class CanalSource extends AbstractSource implements Configurable, Pollabl
         String port = CanalClientConf.CANAL_PORT;
         connector = CanalConnectors.newSingleConnector(new InetSocketAddress(
                 ip, Integer.parseInt(port)), destination, "", "");
-        log.info("--------After new newSingleConnector------");
         connector.connect();
-        log.info("--------After connected------");
         connector.subscribe();
-        log.info("--------After subscribe ------");
         super.start();
     }
 
