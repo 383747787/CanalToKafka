@@ -61,9 +61,9 @@ public class CanalSource extends AbstractSource implements Configurable, Pollabl
                     log.info("twoMap.size : " + twoMap.size());
                     oneMap.put("total", twoMap);
                     String JsonString = JSONArray.toJSON(oneMap).toString();
-                    String JsonStringFinally = JsonString.substring(1, JsonString.length() - 1);
+//                    String JsonStringFinally = JsonString.substring(1, JsonString.length() - 1);
                     event.setHeaders(headers);
-                    event.setBody(JsonStringFinally.getBytes());
+                    event.setBody(JsonString.getBytes());
                     getChannelProcessor().processEvent(event);
                 } else {
                     log.warn("twoMap is null OR twoMap size is 0!");
@@ -107,8 +107,7 @@ public class CanalSource extends AbstractSource implements Configurable, Pollabl
         for (Map.Entry<String, String> entry : props.entrySet()) {
             this.parameters.put(entry.getKey(), entry.getValue());
         }
-        CanalClientConf.CONFIG_PATH = Preconditions.checkNotNull((String) this.parameters
-                .get(CONFIG_PATH));
+        CanalClientConf.CONFIG_PATH = Preconditions.checkNotNull((String) this.parameters.get(CONFIG_PATH));
 
         CanalClientConf.CANAL_IP = PropertiesUtil.getInstance().getProperty("canal_ip");
         CanalClientConf.CANAL_PORT = PropertiesUtil.getInstance().getProperty("canal_port");

@@ -24,11 +24,12 @@ public class GomeKafkaSink extends AbstractSink implements Configurable {
     private Producer<String, String> producer;
 
     private static final String PARTITION_KEY_NAME = "partition.key";
-    private static final String CUSTOME_TOPIC_KEY_NAME = "custom.topic.name";
+    private static final String CUSTOME_TOPIC_KEY_NAME = "topic";
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     @Override
     public void configure(Context context) {
+        log.info("------------Start KafkaSink Configuration--------------------");
         this.context = context;
         ImmutableMap<String, String> props = context.getParameters();
         this.parameters = new Properties();
@@ -39,6 +40,7 @@ public class GomeKafkaSink extends AbstractSink implements Configurable {
 
     @Override
     public synchronized void start() {
+        log.info("------------Start KafkaSink --------------------");
         super.start();
         ProducerConfig config = new ProducerConfig(this.parameters);
         this.producer = new Producer<String, String>(config);

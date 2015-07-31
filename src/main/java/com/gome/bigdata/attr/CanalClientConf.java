@@ -48,5 +48,5 @@ public class CanalClientConf {
     /**
      * 应用配置文件的地址
      */
-    public static String CONFIG_PATH = "";
+    public static String CONFIG_PATH = "config.properties";
 }
