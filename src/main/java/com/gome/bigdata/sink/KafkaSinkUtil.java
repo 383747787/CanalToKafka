@@ -18,7 +18,8 @@ package com.gome.bigdata.sink;
 
 import org.apache.flume.Context;
 import org.apache.flume.conf.ConfigurationException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Properties;
 public class KafkaSinkUtil {
 
   private static final Logger log =
-          Logger.getLogger(KafkaSinkUtil.class);
+          LoggerFactory.getLogger(KafkaSinkUtil.class);
 
   public static Properties getKafkaProperties(Context context) {
     Properties props =  generateDefaultKafkaProps();

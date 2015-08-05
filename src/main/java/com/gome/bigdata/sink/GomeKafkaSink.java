@@ -8,7 +8,8 @@ import kafka.producer.ProducerConfig;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
@@ -17,7 +18,7 @@ import java.util.Properties;
  * Created by lujia on 2015/6/19.
  */
 public class GomeKafkaSink extends AbstractSink implements Configurable {
-    private static Logger log = Logger.getLogger(GomeKafkaSink.class);
+    private static Logger log = LoggerFactory.getLogger(GomeKafkaSink.class);
 
     private Context context;
     private Properties parameters;
@@ -59,7 +60,7 @@ public class GomeKafkaSink extends AbstractSink implements Configurable {
                 String topic = Preconditions.checkNotNull((String) this.parameters.get(CUSTOME_TOPIC_KEY_NAME),
                         "topic name is required");
                 String eventData = new String(event.getBody(), DEFAULT_ENCODING);
-                KeyedMessage<String, String> data  = new KeyedMessage<String, String>(topic,eventData);
+                KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, eventData);
                 log.info("Sending Message to Kafka : [" + topic + ":" + eventData + "]");
                 producer.send(data);
                 transaction.commit();
