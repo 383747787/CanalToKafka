@@ -25,8 +25,7 @@ import kafka.producer.ProducerConfig;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +64,7 @@ import java.util.Properties;
  */
 public class KafkaSink extends AbstractSink implements Configurable {
 
-    private static final Logger logger = LoggerFactory.getLogger(KafkaSink.class);
+    private static final Logger logger = Logger.getLogger(KafkaSink.class);
     public static final String KEY_HDR = "key";
     public static final String TOPIC_HDR = "topic";
     private Properties kafkaProps;

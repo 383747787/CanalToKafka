@@ -24,11 +24,10 @@ import com.alibaba.otter.canal.client.CanalConnectors;
 import com.alibaba.otter.canal.protocol.Message;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 public class CanalSource extends AbstractSource implements Configurable, PollableSource {
-    private static Logger log = LoggerFactory.getLogger(CanalSource.class);
+    private static Logger log = Logger.getLogger(CanalSource.class);
     public Context context;
     public Properties parameters;
     public CanalConnector connector;

@@ -11,8 +11,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.gome.bigdata.attr.CanalClientConf;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.slf4j.MDC;
 
 import com.alibaba.otter.canal.client.CanalConnector;
@@ -26,7 +25,7 @@ import com.alibaba.otter.canal.protocol.CanalEntry.RowChange;
 import com.alibaba.otter.canal.protocol.CanalEntry.RowData;
 
 public class AnalysisBinLog {
-    private static Logger log = LoggerFactory.getLogger(AnalysisBinLog.class);
+    private static Logger log = Logger.getLogger(AnalysisBinLog.class);
 
     public static void main(String[] args) {
 
@@ -56,13 +55,13 @@ public class AnalysisBinLog {
                     }
                     if (twoMap != null && twoMap.size() != 0) {
                         oneMap.put("total", twoMap);
-                        System.out.println(twoMap.size());
+                        log.info("Map: " + twoMap.size());
                         String JsonString = JSONArray.toJSON(oneMap)
                                 .toString();
                         String JsonStringFinally = JsonString.substring(1,
                                 JsonString.length() - 1);
 
-                        System.out.println(JsonStringFinally);
+                        log.info("JsonStringFinally:" + JsonStringFinally);
                     }
 
                 }
@@ -82,14 +81,13 @@ public class AnalysisBinLog {
         String sql = "";
         for (Entry entry : entrys) {
             if (entry.getEntryType() == EntryType.ROWDATA) {
-                System.out.println("11111111111111111111");
                 RowChange rowChage = null;
                 rowChage = RowChange.parseFrom(entry.getStoreValue());
                 EventType eventType = rowChage.getEventType();
 
                 if (eventType == EventType.QUERY || rowChage.getIsDdl()) {
                     sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
-                    System.out.println("query or ddl sql --> : " + sql);
+                    log.info("query or ddl sql --> : " + sql);
                     continue;
                 }
 
@@ -117,13 +115,13 @@ public class AnalysisBinLog {
                     for (RowData rowData : rowChage.getRowDatasList()) {
                         Map threeMap = initcol(tableName, eventType.name(), databases);
                         if (eventType == EventType.DELETE) {
-                            System.out.println("DELETE");
+                            log.info("Event Type: DELETE");
                             createDeleteMap(rowData, threeMap);
                         } else if (eventType == EventType.INSERT) {
-                            System.out.println("INSERT");
+                            log.info("Event Type: INSERT");
                             createInsertMap(rowData, threeMap);
                         } else if (eventType == EventType.UPDATE) {
-                            System.out.println("UPDATE");
+                            log.info("Event Type: UPDATE");
                             createUpdateMap(rowData, threeMap);
                         } else {
 

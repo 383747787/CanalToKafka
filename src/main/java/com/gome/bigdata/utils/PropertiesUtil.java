@@ -6,8 +6,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.event.ConfigurationEvent;
 import org.apache.commons.configuration.event.ConfigurationListener;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 
@@ -23,7 +22,7 @@ public class PropertiesUtil {
     /**
      * 日志
      */
-    private static final Logger log = LoggerFactory.getLogger(PropertiesUtil.class);
+    private static final Logger log = Logger.getLogger(PropertiesUtil.class);
 
     /**
      * Singleton
