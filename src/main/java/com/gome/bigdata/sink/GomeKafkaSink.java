@@ -8,8 +8,9 @@ import kafka.producer.ProducerConfig;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
-import org.apache.log4j.Logger;
-
+//import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Properties;
 
@@ -17,7 +18,7 @@ import java.util.Properties;
  * Created by lujia on 2015/6/19.
  */
 public class GomeKafkaSink extends AbstractSink implements Configurable {
-    private static Logger log = Logger.getLogger(GomeKafkaSink.class);
+    private static Logger log = LoggerFactory.getLogger(GomeKafkaSink.class);
 
     private Context context;
     private Properties parameters;

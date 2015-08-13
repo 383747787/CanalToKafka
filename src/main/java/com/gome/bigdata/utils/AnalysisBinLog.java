@@ -11,7 +11,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.gome.bigdata.attr.CanalClientConf;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.alibaba.otter.canal.client.CanalConnector;
@@ -25,7 +27,7 @@ import com.alibaba.otter.canal.protocol.CanalEntry.RowChange;
 import com.alibaba.otter.canal.protocol.CanalEntry.RowData;
 
 public class AnalysisBinLog {
-    private static Logger log = Logger.getLogger(AnalysisBinLog.class);
+    private static Logger log = LoggerFactory.getLogger(AnalysisBinLog.class);
 
     public static void main(String[] args) {
 
