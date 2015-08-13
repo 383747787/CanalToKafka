@@ -87,11 +87,21 @@ public class AnalysisBinLog {
                 rowChage = RowChange.parseFrom(entry.getStoreValue());
                 EventType eventType = rowChage.getEventType();
 
-                if (eventType == EventType.QUERY || rowChage.getIsDdl()) {
-                    sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
-                    log.info("query or ddl sql --> : " + sql);
+//                log.info("--T E S T--");
+//                log.info("EventType: " + eventType);
+//                log.info("DDL: " + rowChage.getIsDdl());
+//                log.info("Row Change: " + rowChage.toString());
+
+//                if (eventType == EventType.QUERY || rowChage.getIsDdl()) {
+//                    sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
+//                    log.info("query or ddl sql --> : " + sql);
+//                    continue;
+//                }
+                if (rowChage.getIsDdl() || (eventType != EventType.INSERT && eventType != EventType.DELETE && eventType != EventType.UPDATE)) {
+                    log.info("Unacceptable operations: " + eventType);
                     continue;
                 }
+                sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
 
                 String tableName = entry.getHeader().getTableName();
                 String databases = entry.getHeader().getSchemaName();
