@@ -81,6 +81,7 @@ public class AnalysisBinLog {
         Map twoMap = new HashMap();
         Integer i = 1;
         String sql = "";
+        log.info("Entrys: " + entrys.toString() +"\n\n-------------------------\n");
         for (Entry entry : entrys) {
             if (entry.getEntryType() == EntryType.ROWDATA) {
                 RowChange rowChage = null;
@@ -88,6 +89,7 @@ public class AnalysisBinLog {
                 EventType eventType = rowChage.getEventType();
 
 //                log.info("--T E S T--");
+//                log.info("Entry: " + entry.toString());
 //                log.info("EventType: " + eventType);
 //                log.info("DDL: " + rowChage.getIsDdl());
 //                log.info("Row Change: " + rowChage.toString());
@@ -98,7 +100,7 @@ public class AnalysisBinLog {
 //                    continue;
 //                }
                 if (rowChage.getIsDdl() || (eventType != EventType.INSERT && eventType != EventType.DELETE && eventType != EventType.UPDATE)) {
-                    log.info("Unacceptable operations: " + eventType);
+                    log.info("Unacceptable operation: " + eventType);
                     continue;
                 }
                 sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
