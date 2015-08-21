@@ -197,16 +197,22 @@ public class AnalysisBinLog {
         for (Column column : columns) {
             String name = column.getName();
             String value = column.getValue();
-            //lujia delete
-//            if (StringUtils.isEmpty(value)) {
-//                value = " ";
-//            }
+            //lujia modified
+            if (StringUtils.isEmpty(value)) {
+                value = null;
+            }
             boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
             }
-            fourMap.put(name, value);
+
+            if (isKey == true && value == null) {
+                fourMap.put(name, "");
+            } else {
+                fourMap.put(name, value);
+            }
+
         }
 
         if (primarykeys.equals("") || fourMap == null || fourMap.size() == 0) {
