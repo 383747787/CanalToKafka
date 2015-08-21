@@ -168,14 +168,18 @@ public class AnalysisBinLog {
         for (Column column : columns) {
             String name = column.getName();
             String value = column.getValue();
-//            if (StringUtils.isEmpty(value)) {
-//                value = " ";
-//            }
+            if (StringUtils.isEmpty(value)) {
+                value = null;
+            }
             boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
-                fourMap.put(name, value);
+                if (null == value) {
+                    fourMap.put(name, "");
+                } else {
+                    fourMap.put(name, value);
+                }
             }
         }
 
@@ -236,14 +240,19 @@ public class AnalysisBinLog {
             String name = column.getName();
             String value = column.getValue();
             //lujia delete
-//            if (StringUtils.isEmpty(value)) {
-//                value = " ";
-//            }
+            if (StringUtils.isEmpty(value)) {
+                value = null;
+            }
             boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
-                fourMap.put(name, value);
+                if (null == value) {
+                    fourMap.put(name, "");
+                } else {
+                    fourMap.put(name, value);
+                }
+
                 if (updated == true && isPk == false) {
                     isPk = true;
                 }
