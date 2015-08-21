@@ -81,7 +81,6 @@ public class AnalysisBinLog {
         Map twoMap = new HashMap();
         Integer i = 1;
         String sql = "";
-        log.info("Entrys: " + entrys.toString() +"\n\n-------------------------\n");
         for (Entry entry : entrys) {
             if (entry.getEntryType() == EntryType.ROWDATA) {
                 RowChange rowChage = null;
@@ -100,10 +99,10 @@ public class AnalysisBinLog {
 //                    continue;
 //                }
                 if (rowChage.getIsDdl() || (eventType != EventType.INSERT && eventType != EventType.DELETE && eventType != EventType.UPDATE)) {
+                    sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
                     log.info("Unacceptable operation: " + eventType);
                     continue;
                 }
-                sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
 
                 String tableName = entry.getHeader().getTableName();
                 String databases = entry.getHeader().getSchemaName();
@@ -169,9 +168,9 @@ public class AnalysisBinLog {
         for (Column column : columns) {
             String name = column.getName();
             String value = column.getValue();
-            if (StringUtils.isEmpty(value)) {
-                value = null;
-            }
+//            if (StringUtils.isEmpty(value)) {
+//                value = " ";
+//            }
             boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
             if (isKey == true) {
@@ -198,9 +197,10 @@ public class AnalysisBinLog {
         for (Column column : columns) {
             String name = column.getName();
             String value = column.getValue();
-            if (StringUtils.isEmpty(value)) {
-                value = null;
-            }
+            //lujia delete
+//            if (StringUtils.isEmpty(value)) {
+//                value = " ";
+//            }
             boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
             if (isKey == true) {
@@ -229,9 +229,10 @@ public class AnalysisBinLog {
         for (Column column : columnsAfter) {
             String name = column.getName();
             String value = column.getValue();
-            if (StringUtils.isEmpty(value)) {
-                value = null;
-            }
+            //lujia delete
+//            if (StringUtils.isEmpty(value)) {
+//                value = " ";
+//            }
             boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
             if (isKey == true) {
@@ -252,9 +253,10 @@ public class AnalysisBinLog {
             for (Column column : columnsBefore) {
                 String name = column.getName();
                 String value = column.getValue();
-                if (StringUtils.isEmpty(value)) {
-                    value = null;
-                }
+                //lujia deleted
+//                if (StringUtils.isEmpty(value)) {
+//                    value = " ";
+//                }
                 if (keyList.contains(name)) {
                     fourMap.put(name + "_BEFORE", value);
                 }
