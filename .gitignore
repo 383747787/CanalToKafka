@@ -2,6 +2,7 @@
 .idea/
 target/
 logs/
+test/
 *.log
 flume_libs/
 flume_1.4_libs/
