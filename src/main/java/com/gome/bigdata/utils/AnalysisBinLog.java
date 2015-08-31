@@ -176,7 +176,7 @@ public class AnalysisBinLog {
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
                 if (null == value) {
-                    fourMap.put(name, " ");
+                    fourMap.put(name, "");
                 } else {
                     fourMap.put(name, value);
                 }
@@ -212,7 +212,7 @@ public class AnalysisBinLog {
             }
 
             if (isKey == true && value == null) {
-                fourMap.put(name, " ");
+                fourMap.put(name, "");
             } else {
                 fourMap.put(name, value);
             }
@@ -248,7 +248,7 @@ public class AnalysisBinLog {
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
                 if (null == value) {
-                    fourMap.put(name, " ");
+                    fourMap.put(name, "");
                 } else {
                     fourMap.put(name, value);
                 }
