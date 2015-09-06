@@ -102,7 +102,7 @@ public class AnalysisBinLog {
                     sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
                     log.info("Unacceptable operation: " + eventType);
                     continue;
-                }
+            }
 
                 String tableName = entry.getHeader().getTableName();
                 String databases = entry.getHeader().getSchemaName();
@@ -148,10 +148,9 @@ public class AnalysisBinLog {
                     log.info("sucess_sql : " + sql);
                     log.info("*********************");
                 } catch (Exception e) {
-                    log.info("*********************");
-                    log.info("fail_sql : " + sql);
-                    log.info("*********************");
-//                    RecordLog.writeLog(GetConfig.getConfigInfomation("SendFailPath"), sql);
+                    log.error("*********************");
+                    log.error("fail_sql : " + sql);
+                    log.error("*********************");
                     continue;
                 }
             }
@@ -239,7 +238,7 @@ public class AnalysisBinLog {
         for (Column column : columnsAfter) {
             String name = column.getName();
             String value = column.getValue();
-            //lujia delete
+            //lujia modified
             if (StringUtils.isEmpty(value)) {
                 value = null;
             }
@@ -268,7 +267,7 @@ public class AnalysisBinLog {
             for (Column column : columnsBefore) {
                 String name = column.getName();
                 String value = column.getValue();
-                //lujia deleted
+                //lujia modified
 //                if (StringUtils.isEmpty(value)) {
 //                    value = " ";
 //                }
