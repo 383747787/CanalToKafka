@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONArray;
 import com.gome.bigdata.attr.CanalClientConf;
+import com.gome.bigdata.attr.TableFilterConf;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 //import org.apache.log4j.Logger;
@@ -99,16 +100,21 @@ public class AnalysisBinLog {
 //                    continue;
 //                }
                 if (rowChage.getIsDdl() || (eventType != EventType.INSERT && eventType != EventType.DELETE && eventType != EventType.UPDATE)) {
-                    sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
+//                    sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
                     log.info("Unacceptable operation: " + eventType);
                     continue;
-            }
+                }
+
+                sql = rowChage.getSql() + SystemUtils.LINE_SEPARATOR;
 
                 String tableName = entry.getHeader().getTableName();
                 String databases = entry.getHeader().getSchemaName();
                 boolean isTotalImport = CanalClientConf.IS_TOTAL_IMPORT;
                 String includeTable = CanalClientConf.INCLUDE_TABLES;
                 String includeDataBase = CanalClientConf.INCLUDE_DATABASE;
+
+                boolean isInclude = TableFilterConf.IS_FIELD_INCLUDE;
+                boolean isExclude = TableFilterConf.IS_FIELD_EXCLUDE;
 
                 if (!includeDataBase.contains(databases)) {
                     log.info("*********************");
@@ -132,14 +138,15 @@ public class AnalysisBinLog {
                             createDeleteMap(rowData, threeMap);
                         } else if (eventType == EventType.INSERT) {
                             log.info("Event Type: INSERT");
-                            createInsertMap(rowData, threeMap);
+                            createInsertMap(rowData, threeMap, tableName, isInclude, isExclude);
                         } else if (eventType == EventType.UPDATE) {
                             log.info("Event Type: UPDATE");
-                            createUpdateMap(rowData, threeMap);
+                            createUpdateMap(rowData, threeMap, tableName, isInclude, isExclude);
                         } else {
-
+                            log.warn("What's this?");
                         }
                         if (threeMap != null && threeMap.size() > 5) {
+                            log.info("---Three Map : " + threeMap.toString());
                             twoMap.put(i.toString(), threeMap);
                             i++;
                         }
@@ -170,7 +177,6 @@ public class AnalysisBinLog {
             if (StringUtils.isEmpty(value)) {
                 value = null;
             }
-            boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
@@ -192,7 +198,7 @@ public class AnalysisBinLog {
         return threeMap;
     }
 
-    public static Map createInsertMap(RowData rowData, Map threeMap)
+    public static Map createInsertMap(RowData rowData, Map threeMap, String tableName, boolean isInclude, boolean isExclude)
             throws Exception {
         Map fourMap = new HashMap();
         List<Column> columns = rowData.getAfterColumnsList();
@@ -200,12 +206,23 @@ public class AnalysisBinLog {
         for (Column column : columns) {
             String name = column.getName();
             String value = column.getValue();
+            boolean isKey = column.getIsKey();
+
+            if (isInclude) {
+                if (!(TableFilterConf.FIELD_INCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase()) || isKey)) {
+                    continue;
+                }
+            } else if (isExclude) {
+                if(TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase())){
+                    continue;
+                }
+            }
+
             //lujia modified
             if (StringUtils.isEmpty(value)) {
                 value = null;
             }
-            boolean updated = column.getUpdated();
-            boolean isKey = column.getIsKey();
+
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
             }
@@ -228,22 +245,39 @@ public class AnalysisBinLog {
         return threeMap;
     }
 
-    public static Map createUpdateMap(RowData rowData, Map threeMap)
+    public static Map createUpdateMap(RowData rowData, Map threeMap, String tableName, boolean isInclude, boolean isExclude)
             throws Exception {
         boolean isPk = false;
         Map fourMap = new HashMap();
         List<Column> columnsBefore = rowData.getBeforeColumnsList();
         List<Column> columnsAfter = rowData.getAfterColumnsList();
         String primarykeys = "";
+        boolean isUpdated = false;
         for (Column column : columnsAfter) {
             String name = column.getName();
             String value = column.getValue();
+            boolean updated = column.getUpdated();
+            boolean isKey = column.getIsKey();
+
+            if (isInclude) {
+                if (!(TableFilterConf.FIELD_INCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase()) || isKey)) {
+                    continue;
+                }
+            } else if (isExclude) {
+                if(TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase())){
+                    continue;
+                }
+            }
+            if (updated) {
+                isUpdated = true;
+            }
+
+
             //lujia modified
             if (StringUtils.isEmpty(value)) {
                 value = null;
             }
-            boolean updated = column.getUpdated();
-            boolean isKey = column.getIsKey();
+
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
                 if (null == value) {
@@ -262,15 +296,16 @@ public class AnalysisBinLog {
             }
         }
 
+        //如果所有列都没有变化就取消
+        if (false == isUpdated) {
+            return threeMap;
+        }
+
         if (isPk == true) {
             List keyList = Arrays.asList(primarykeys.split(","));
             for (Column column : columnsBefore) {
                 String name = column.getName();
                 String value = column.getValue();
-                //lujia modified
-//                if (StringUtils.isEmpty(value)) {
-//                    value = " ";
-//                }
                 if (keyList.contains(name)) {
                     fourMap.put(name + "_BEFORE", value);
                 }

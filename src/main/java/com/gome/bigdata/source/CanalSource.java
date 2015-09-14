@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.gome.bigdata.attr.CanalClientConf;
+import com.gome.bigdata.attr.TableFilterConf;
 import com.gome.bigdata.utils.AnalysisBinLog;
 import com.gome.bigdata.utils.PropertiesUtil;
 import org.apache.flume.Context;
@@ -121,6 +123,48 @@ public class CanalSource extends AbstractSource implements Configurable, Pollabl
         CanalClientConf.ORACLE_OWNER = PropertiesUtil.getInstance().getProperty("owner");
 
         CanalClientConf.FLUME_SOURCE_BATCH_SIZE = Integer.parseInt(PropertiesUtil.getInstance().getProperty("batch_size"));
+
+        log.info("-----------------Complete canal client configuration---------------------");
+
+        log.info("---------------Start Table Filter Configuration----------------");
+
+        TableFilterConf.IS_FIELD_INCLUDE = Boolean.parseBoolean(PropertiesUtil.getInstance().getProperty("field_include"));
+        if (TableFilterConf.IS_FIELD_INCLUDE) {
+            TableFilterConf.FIELD_INCLUDE_TABLES = PropertiesUtil.getInstance().getProperty("field_include_tables");
+            log.info("include tables;" + TableFilterConf.FIELD_INCLUDE_TABLES);
+            TableFilterConf.FIELD_INCLUDE_TABLES_JSON = new JSONObject();
+            String[] includeTables = TableFilterConf.FIELD_INCLUDE_TABLES.trim().split(";");
+            log.info(includeTables.toString());
+            for (int i = 0; i < includeTables.length; i++) {
+                String tableName = includeTables[i];
+                log.info("Include Table Name: " + tableName);
+                log.info("fields_of_include_" + tableName);
+                String includeFields = PropertiesUtil.getInstance().getProperty("fields_of_include_" + tableName.trim());
+                log.info(includeFields);
+                TableFilterConf.FIELD_INCLUDE_TABLES_JSON.put(tableName, includeFields);
+                log.info(TableFilterConf.FIELD_INCLUDE_TABLES);
+            }
+        }
+
+        TableFilterConf.IS_FIELD_EXCLUDE = Boolean.parseBoolean(PropertiesUtil.getInstance().getProperty("field_exclude"));
+        if (TableFilterConf.IS_FIELD_EXCLUDE) {
+            TableFilterConf.FIELD_EXCLUDE_TABLES = PropertiesUtil.getInstance().getProperty("field_exclude_tables");
+            log.info("exclude tables: " + TableFilterConf.FIELD_EXCLUDE_TABLES);
+            TableFilterConf.FIELD_EXCLUDE_TABLES_JSON = new JSONObject();
+            String[] excludeTables = TableFilterConf.FIELD_EXCLUDE_TABLES.trim().split(";");
+            log.info(excludeTables.toString());
+            for (int i = 0; i < excludeTables.length; i++) {
+                String tableName = excludeTables[i];
+                log.info("Exclude Table Name: " + tableName);
+                log.info("fields_of_exclude_" + tableName);
+                String excludeFields = PropertiesUtil.getInstance().getProperty("fields_of_exclude_" + tableName.trim());
+                log.info(excludeFields);
+                TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.put(tableName, excludeFields);
+                log.info(TableFilterConf.FIELD_INCLUDE_TABLES);
+            }
+
+        }
+
 
         log.info("------------------Complete Configuration-----------------------");
     }
