@@ -23,7 +23,7 @@ public class CanalClientConf {
     /**
      * 保存到Oracle之后的Owner名
      */
-    public static String ORACLE_OWNER = "DRG_CORE_OGG";
+    public static String ORACLE_OWNER = "DRG_CORE_PRD";
 
     /**
      * 部署canal的ip地址

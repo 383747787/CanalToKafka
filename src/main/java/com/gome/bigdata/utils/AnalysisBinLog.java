@@ -2,12 +2,11 @@ package com.gome.bigdata.utils;
 
 
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.gome.bigdata.attr.CanalClientConf;
 import com.gome.bigdata.attr.TableFilterConf;
 import org.apache.commons.lang.StringUtils;
@@ -32,9 +31,9 @@ public class AnalysisBinLog {
 
     public static void main(String[] args) {
 
-        String destination = "example";
+        String destination = "3pp";
         CanalConnector connector = CanalConnectors.newSingleConnector(
-                new InetSocketAddress("10.126.53.216", 11111), destination, "",
+                new InetSocketAddress("10.58.47.235", 21111), destination, "",
                 "");
         int batchSize = 1 * 1024;
         try {
@@ -53,6 +52,7 @@ public class AnalysisBinLog {
                     try {
                         // twoMap = new HashMap();
                         twoMap = analysisBinLog(message.getEntries());
+                        System.out.println(twoMap);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -146,7 +146,7 @@ public class AnalysisBinLog {
                             log.warn("What's this?");
                         }
                         if (threeMap != null && threeMap.size() > 5) {
-                            log.info("---Three Map : " + threeMap.toString());
+//                            log.info("---Three Map : " + threeMap.toString());
                             twoMap.put(i.toString(), threeMap);
                             i++;
                         }
@@ -172,19 +172,16 @@ public class AnalysisBinLog {
         List<Column> columns = rowData.getBeforeColumnsList();
         String primarykeys = "";
         for (Column column : columns) {
-            String name = column.getName();
+            String name = column.getName().toUpperCase();
             String value = column.getValue();
             if (StringUtils.isEmpty(value)) {
-                value = null;
+                fourMap.put(name, "NULL");
+            } else {
+                fourMap.put(name, value);
             }
             boolean isKey = column.getIsKey();
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
-                if (null == value) {
-                    fourMap.put(name, "");
-                } else {
-                    fourMap.put(name, value);
-                }
             }
         }
 
@@ -204,7 +201,7 @@ public class AnalysisBinLog {
         List<Column> columns = rowData.getAfterColumnsList();
         String primarykeys = "";
         for (Column column : columns) {
-            String name = column.getName();
+            String name = column.getName().toUpperCase();
             String value = column.getValue();
             boolean isKey = column.getIsKey();
 
@@ -213,26 +210,21 @@ public class AnalysisBinLog {
                     continue;
                 }
             } else if (isExclude) {
-                if(TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase())){
+                if (TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase())) {
                     continue;
                 }
             }
 
             //lujia modified
             if (StringUtils.isEmpty(value)) {
-                value = null;
+                fourMap.put(name, "NULL");
+            } else {
+                fourMap.put(name, value);
             }
 
             if (isKey == true) {
                 primarykeys = primarykeys + name + ",";
             }
-
-            if (isKey == true && value == null) {
-                fourMap.put(name, "");
-            } else {
-                fourMap.put(name, value);
-            }
-
         }
 
         if (primarykeys.equals("") || fourMap == null || fourMap.size() == 0) {
@@ -252,68 +244,64 @@ public class AnalysisBinLog {
         List<Column> columnsBefore = rowData.getBeforeColumnsList();
         List<Column> columnsAfter = rowData.getAfterColumnsList();
         String primarykeys = "";
-        boolean isUpdated = false;
+        boolean isPkUpdated = false;
+
         for (Column column : columnsAfter) {
-            String name = column.getName();
+            String name = column.getName().toUpperCase();
             String value = column.getValue();
             boolean updated = column.getUpdated();
             boolean isKey = column.getIsKey();
-
             if (isInclude) {
                 if (!(TableFilterConf.FIELD_INCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase()) || isKey)) {
                     continue;
                 }
             } else if (isExclude) {
-                if(TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase())){
+                if (TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase())) {
                     continue;
                 }
             }
-            if (updated) {
-                isUpdated = true;
-            }
 
-
-            //lujia modified
             if (StringUtils.isEmpty(value)) {
-                value = null;
-            }
-
-            if (isKey == true) {
-                primarykeys = primarykeys + name + ",";
-                if (null == value) {
-                    fourMap.put(name, "");
-                } else {
-                    fourMap.put(name, value);
-                }
-
-                if (updated == true && isPk == false) {
-                    isPk = true;
-                }
+                fourMap.put(name, "NULL");
             } else {
-                if (updated == true) {
-                    fourMap.put(name, value);
+                fourMap.put(name, value);
+            }
+
+            if (isKey) {
+                primarykeys = primarykeys + name + ",";
+                if (updated) {
+                    isPkUpdated = true;
                 }
             }
         }
 
-        //如果所有列都没有变化就取消
-        if (false == isUpdated) {
-            return threeMap;
-        }
-
-        if (isPk == true) {
-            List keyList = Arrays.asList(primarykeys.split(","));
-            for (Column column : columnsBefore) {
-                String name = column.getName();
-                String value = column.getValue();
-                if (keyList.contains(name)) {
-                    fourMap.put(name + "_BEFORE", value);
-                }
-            }
+        if (isPkUpdated) {
             threeMap.put("META-PERATEIONTYPE", "UPDATE_FIELDCOMP_PK");
         } else {
             threeMap.put("META-PERATEIONTYPE", "UPDATE_FIELDCOMP");
         }
+
+        for (Column column : columnsBefore) {
+            String name = column.getName().toUpperCase();
+            String value = column.getValue();
+            boolean isKey = column.getIsKey();
+            if (isInclude) {
+                if (!(TableFilterConf.FIELD_INCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase()) || isKey)) {
+                    continue;
+                }
+            } else if (isExclude) {
+                if (TableFilterConf.FIELD_EXCLUDE_TABLES_JSON.getString(tableName).contains(name.toLowerCase())) {
+                    continue;
+                }
+            }
+
+            if (StringUtils.isEmpty(value)) {
+                fourMap.put(name + "_BEFORE", "NULL");
+            } else {
+                fourMap.put(name + "_BEFORE", value);
+            }
+        }
+
 
         if (primarykeys.equals("") || fourMap == null || fourMap.size() == 0) {
             return null;
@@ -322,6 +310,7 @@ public class AnalysisBinLog {
         threeMap.put("META-PRIMARYKEY",
                 primarykeys.substring(0, primarykeys.length() - 1));
         threeMap.put("META-FILEDVALUE", fourMap);
+
         return threeMap;
     }
 
@@ -330,11 +319,49 @@ public class AnalysisBinLog {
         Map threeMap = new HashMap();
         String ids = null;
         threeMap.put("META-OWNER", CanalClientConf.ORACLE_OWNER);
-        threeMap.put("META-TABLE", tableName);
-        threeMap.put("META-PERATEIONTYPE", type);
+        threeMap.put("META-TABLE", tableName.toUpperCase());
+        threeMap.put("META-PERATEIONTYPE", type.toUpperCase());
         threeMap.put("META-PRIMARYKEY", "");
-        threeMap.put("META-DATABASE", databases);
+        threeMap.put("META-DATABASE", databases.toUpperCase());
         return threeMap;
+    }
+
+    /**
+     * 把原始json解析成单行操作，按照顺序保存
+     *
+     * @param msg
+     * @return 操作顺序
+     */
+    public static ArrayList<String> parseOperations(String msg) {
+        ArrayList<String> jsonList = new ArrayList<String>();
+        String obj = "";
+        if (msg.trim().startsWith("[")) {
+            obj = msg.trim().substring(1, msg.length() - 1);
+        } else {
+            obj = msg.trim();
+        }
+
+        JSONObject jsonTotal = JSON.parseObject(obj);
+        JSONObject content = jsonTotal.getJSONObject("total");
+
+        //todo 跟增涛确定是否一定是从"1"开始的
+        for (int i = 1; i < content.keySet().size() + 1; i++) {
+            jsonList.add(content.getString(String.valueOf(i)));
+        }
+        return jsonList;
+    }
+
+    /**
+     * 根据Json数据获取出 数据库名和表面组合成 partitionKey的关键字，发到kafka的不同partition中
+     *
+     * @param jsonObj josn格式的opt
+     * @return database.table
+     */
+    public static String getPartitionKey(String jsonObj) {
+        JSONObject jsonOpt = JSON.parseObject(jsonObj);
+        StringBuilder stringOpt = new StringBuilder();
+        stringOpt.append(jsonOpt.getString("META-DATABASE")).append(".").append(jsonOpt.getString("META-TABLE"));
+        return stringOpt.toString();
     }
 
 }

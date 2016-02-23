@@ -1,5 +1,6 @@
 package com.gome.bigdata.sink;
 
+import com.gome.bigdata.utils.AnalysisBinLog;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import kafka.javaapi.producer.Producer;
@@ -11,6 +12,8 @@ import org.apache.flume.sink.AbstractSink;
 //import org.apache.log4j.Logger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
@@ -37,6 +40,7 @@ public class GomeKafkaSink extends AbstractSink implements Configurable {
         for (Map.Entry<String, String> entry : props.entrySet()) {
             this.parameters.put(entry.getKey(), entry.getValue());
         }
+        this.parameters.put("partitioner.class", "com.gome.bigdata.kafka.KafkaPartitioner");
     }
 
     @Override
@@ -56,13 +60,18 @@ public class GomeKafkaSink extends AbstractSink implements Configurable {
             transaction.begin();
             Event event = channel.take();
             if (event != null) {
-                //String partitionKey = (String) parameters.get(PARTITION_KEY_NAME);
+                String partitionKey;
                 String topic = Preconditions.checkNotNull((String) this.parameters.get(CUSTOME_TOPIC_KEY_NAME),
                         "topic name is required");
                 String eventData = new String(event.getBody(), DEFAULT_ENCODING);
-                KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, eventData);
-                log.info("Sending Message to Kafka : [" + topic + ":" + eventData + "]");
-                producer.send(data);
+                ArrayList<String> dataList = AnalysisBinLog.parseOperations(eventData);
+                for (String data : dataList) {
+                    partitionKey = AnalysisBinLog.getPartitionKey(data);
+                    KeyedMessage<String, String> kafkaData = new KeyedMessage<String, String>(topic, partitionKey, data);
+                    producer.send(kafkaData);
+                }
+//                log.info("Sending Message to Kafka : [" + topic + ":" + eventData + "]");
+
                 transaction.commit();
                 log.info("Send message success");
                 status = Status.READY;
@@ -72,7 +81,7 @@ public class GomeKafkaSink extends AbstractSink implements Configurable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            log.info("Send message failed!");
+            log.error("Send message failed!", e);
             transaction.rollback();
             status = Status.BACKOFF;
         } finally {
